@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IT FUTURZ APPLICATION ANALYTICS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .loader-spin {
+            animation: spin 1s linear infinite;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Full Page Loader -->
+    <div id="loader" class="fixed inset-0 bg-white z-50 flex items-center justify-center">
+        <div class="text-center">
+            <img src="https://itfuturz.in/images/products/itf.png" alt="Loading" class="w-32 h-32 loader-spin mx-auto mb-4">
+            <p class="text-sky-600 text-lg font-medium">Loading Analytics...</p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div id="mainContent" class="min-h-screen py-10 px-4 hidden">
+        <!-- Header / Hero -->
+        <div class="max-w-7xl mx-auto mb-10">
+            <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-sky-50 via-white to-sky-50 border border-sky-100 shadow-sm">
+                <div class="absolute inset-y-0 right-0 opacity-20 pointer-events-none">
+                    <div class="w-56 h-56 bg-sky-100 rounded-full blur-3xl translate-x-16 -translate-y-10"></div>
+                </div>
+                <div class="flex flex-col md:flex-row items-center md:items-center gap-6 px-6 py-8 md:px-10 md:py-10">
+                    <div class="flex items-center gap-4 md:gap-6">
+                        <div class="w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-white shadow flex items-center justify-center border border-sky-100">
+                            <img src="https://itfuturz.in/images/products/itf.png" alt="IT Futurz" class="w-12 h-12 md:w-14 md:h-14 object-contain">
+                        </div>
+                        <div>
+                            <h1 class="text-3xl md:text-5xl font-extrabold tracking-tight text-sky-800">
+                                IT FUTURZ
+                            </h1>
+                            <p class="mt-1 text-base md:text-lg font-semibold text-sky-700 tracking-wide">
+                                APPLICATION ANALYTICS
+                            </p>
+                        </div>
+                    </div>
+                    <div class="mt-4 md:mt-0 md:ml-auto text-center md:text-right">
+                        <p class="text-sm md:text-base text-gray-500">
+                            Live overview of user distribution across
+                        </p>
+                        <p class="text-sm md:text-base font-medium text-sky-700">
+                            iOS, Android &amp; Total application users
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs + Content -->
+        <div class="max-w-7xl mx-auto">
+            <!-- Tabs + Refresh -->
+            <div class="mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                <!-- Mobile dropdown -->
+                <div class="md:hidden flex items-center justify-between gap-3">
+                    <select id="viewSelect" class="w-full rounded-md border border-sky-200 bg-white px-3 py-2 text-sm text-sky-700 shadow-sm focus:outline-none focus:ring-1 focus:ring-sky-400">
+                        <option value="grid">Grid View</option>
+                        <option value="charts">Chart View</option>
+                    </select>
+                </div>
+
+                <!-- Desktop tabs -->
+                <div class="hidden md:inline-flex rounded-lg border border-sky-100 bg-white p-1 shadow-sm">
+                    <button id="tab-grid" class="tab-button px-4 py-2 text-sm md:text-base font-medium rounded-md bg-sky-600 text-white shadow">
+                        Grid View
+                    </button>
+                    <button id="tab-charts" class="tab-button px-4 py-2 text-sm md:text-base font-medium rounded-md text-sky-700 hover:bg-sky-50 hover:text-gray-500">
+                        Chart View
+                    </button>
+                </div>
+                <button id="refreshButton" class="inline-flex items-center gap-2 px-3 md:px-4 py-2 text-xs md:text-sm font-medium rounded-md border border-sky-200 text-sky-700 bg-white hover:bg-sky-50 shadow-sm">
+                    <span class="hidden md:inline">Refresh Data</span>
+                    <span class="md:hidden">Refresh</span>
+                    <svg class="w-4 h-4 text-sky-500" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v6h6M20 20v-6h-6M5 19A8 8 0 0 0 19 5M5 5a8 8 0 0 1 14 14" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Grid View (table style with mobile-friendly cards) -->
+            <div id="gridView" class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                <!-- Table Header (desktop only) -->
+                <div class="bg-sky-50 border-b border-gray-200 hidden md:block">
+                    <div class="grid grid-cols-7 gap-4 p-4 font-semibold text-gray-700 text-sm md:text-base">
+                        <div class="text-left">Application</div>
+                        <div class="text-center">iOS Users</div>
+                        <div class="text-center">Android Users</div>
+                        <div class="text-center">Total Users</div>
+                        <div class="text-center">Status</div>
+                        <div class="text-center">Responsible</div>
+                        <div class="text-center">Actions</div>
+                    </div>
+                </div>
+
+                <!-- Table Body -->
+                <div id="tableBody" class="divide-y divide-gray-200">
+                    <!-- Data will be inserted here -->
+                </div>
+            </div>
+
+            <!-- Chart View -->
+            <div id="chartView" class="mt-4 bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-6 hidden">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div>
+                        <h2 class="text-base md:text-lg font-semibold text-gray-800 mb-3">
+                            Users per Application
+                        </h2>
+                        <p class="text-xs md:text-sm text-gray-500 mb-4">
+                            Total users by application (iOS + Android)
+                        </p>
+                        <div class="h-64 md:h-80">
+                            <canvas id="appsBarChart"></canvas>
+                        </div>
+                    </div>
+                    <div>
+                        <h2 class="text-base md:text-lg font-semibold text-gray-800 mb-3">
+                            Overall Platform Split
+                        </h2>
+                        <p class="text-xs md:text-sm text-gray-500 mb-4">
+                            Combined iOS vs Android users across all applications
+                        </p>
+                        <div class="h-64 md:h-80">
+                            <canvas id="platformPieChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // API endpoints configuration
+        const apiEndpoints = [
+            {
+                name: 'GBS',
+                url: 'https://gbs-connect.com/mobile/get-user-analytics'
+            },
+            {
+                name: 'LNG',
+                url: 'https://lng.itfuturz.in/mobile/get-user-analytics'
+            },
+            {
+                name: 'DUBAI SYNDICATE',
+                url: 'https://dubaisyndicate.itfuturz.in/mobile/get-user-analytics'
+            },
+            {
+                name: 'AFRICA COMMUNITY',
+                url: 'https://community.itfuturz.in/mobile/get-user-analytics'
+            },
+            {
+                name: 'NDVIBE',
+                url: 'https://ndvibe.itfuturz.in/mobile/get-user-analytics'
+            },
+            {
+                name: 'THE CIRCLE',
+                url: 'https://thecircle.co.in/mobile/get-user-analytics'
+            }
+        ];
+
+        const responsibleByApp = {
+            'GBS': 'Meet - 7778966277',
+            'LNG': 'Meet - 7778966277',
+            'DUBAI SYNDICATE': 'Meet - 7778966277, Chandan - 7069472565',
+            'AFRICA COMMUNITY': 'Meet - 7778966277, Chandan - 7069472565',
+            'NDVIBE': 'Chandan - 7069472565',
+            'THE CIRCLE': 'Sarim - 9113159189'
+        };
+
+        function attachMobileRowToggles() {
+            const rows = document.querySelectorAll('#tableBody > div');
+            rows.forEach(row => {
+                const toggle = row.querySelector('.app-toggle');
+                const details = row.querySelector('.app-details');
+                const icon = row.querySelector('.dropdown-icon');
+                if (!toggle || !details) return;
+
+                toggle.onclick = () => {
+                    if (window.innerWidth >= 768) return;
+
+                    // Close all other dropdowns
+                    document.querySelectorAll('#tableBody .app-details').forEach(d => {
+                        if (d !== details) {
+                            d.classList.add('hidden');
+                            const parentRow = d.closest('.app-row');
+                            if (parentRow) {
+                                const parentIcon = parentRow.querySelector('.dropdown-icon');
+                                if (parentIcon) parentIcon.classList.remove('rotate-180');
+                            }
+                        }
+                    });
+
+                    // Toggle current
+                    const willOpen = details.classList.contains('hidden');
+                    details.classList.toggle('hidden');
+                    if (icon) {
+                        if (willOpen) {
+                            icon.classList.add('rotate-180');
+                        } else {
+                            icon.classList.remove('rotate-180');
+                        }
+                    }
+                };
+            });
+        }
+
+        let appsBarChartInstance = null;
+        let platformPieChartInstance = null;
+
+        function switchTab(tab) {
+            const gridView = document.getElementById('gridView');
+            const chartView = document.getElementById('chartView');
+            const tabGrid = document.getElementById('tab-grid');
+            const tabCharts = document.getElementById('tab-charts');
+            const viewSelect = document.getElementById('viewSelect');
+
+            if (tab === 'grid') {
+                gridView.classList.remove('hidden');
+                chartView.classList.add('hidden');
+
+                tabGrid.classList.add('bg-sky-600', 'text-white', 'shadow');
+                tabGrid.classList.remove('text-sky-700');
+                tabCharts.classList.remove('bg-sky-600', 'text-white', 'shadow');
+                tabCharts.classList.add('text-sky-700');
+            } else {
+                gridView.classList.add('hidden');
+                chartView.classList.remove('hidden');
+
+                tabCharts.classList.add('bg-sky-600', 'text-white', 'shadow');
+                tabCharts.classList.remove('text-sky-700');
+                tabGrid.classList.remove('bg-sky-600', 'text-white', 'shadow');
+                tabGrid.classList.add('text-sky-700');
+            }
+        }
+
+        function buildChartsFromResults(results) {
+            const appLabels = [];
+            const appTotals = [];
+            let totalIos = 0;
+            let totalAndroid = 0;
+
+            results.forEach(result => {
+                if (result && result.data && result.data.success && result.data.data) {
+                    const analytics = result.data.data;
+                    const appName = analytics.Application?.ApplicationName || result.name;
+                    const iosUsers = analytics.iosUsers || 0;
+                    const androidUsers = analytics.androidUsers || 0;
+                    const totalUsers = analytics.totalUsers || (iosUsers + androidUsers);
+
+                    appLabels.push(appName);
+                    appTotals.push(totalUsers);
+                    totalIos += iosUsers;
+                    totalAndroid += androidUsers;
+                }
+            });
+
+            const barCtx = document.getElementById('appsBarChart')?.getContext('2d');
+            const pieCtx = document.getElementById('platformPieChart')?.getContext('2d');
+
+            if (barCtx) {
+                if (appsBarChartInstance) {
+                    appsBarChartInstance.destroy();
+                }
+                appsBarChartInstance = new Chart(barCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: appLabels,
+                        datasets: [{
+                            label: 'Total Users',
+                            data: appTotals,
+                            backgroundColor: 'rgba(56, 189, 248, 0.7)',
+                            borderColor: 'rgba(14, 165, 233, 1)',
+                            borderWidth: 1.5,
+                            hoverBackgroundColor: 'rgba(37, 99, 235, 0.9)',
+                            hoverBorderColor: 'rgba(30, 64, 175, 1)',
+                            hoverBorderWidth: 2,
+                            borderRadius: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    precision: 0
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        }
+                    }
+                });
+            }
+
+            if (pieCtx) {
+                if (platformPieChartInstance) {
+                    platformPieChartInstance.destroy();
+                }
+                platformPieChartInstance = new Chart(pieCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['iOS Users', 'Android Users'],
+                        datasets: [{
+                            data: [totalIos, totalAndroid],
+                            backgroundColor: [
+                                'rgba(56, 189, 248, 0.8)',
+                                'rgba(59, 130, 246, 0.8)'
+                            ],
+                            borderColor: [
+                                'rgba(56, 189, 248, 1)',
+                                'rgba(59, 130, 246, 1)'
+                            ],
+                            borderWidth: 1.5,
+                            hoverBackgroundColor: [
+                                'rgba(56, 189, 248, 1)',
+                                'rgba(59, 130, 246, 1)'
+                            ],
+                            hoverBorderColor: [
+                                'rgba(8, 47, 73, 1)',
+                                'rgba(30, 64, 175, 1)'
+                            ],
+                            hoverBorderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            }
+                        },
+                        cutout: '60%'
+                    }
+                });
+            }
+        }
+
+        // Fetch data from all APIs
+        async function fetchAllAnalytics() {
+            const loader = document.getElementById('loader');
+            const mainContent = document.getElementById('mainContent');
+            const tableBody = document.getElementById('tableBody');
+
+            try {
+                // Fetch data from all endpoints
+                const promises = apiEndpoints.map(async (endpoint) => {
+                    try {
+                        const response = await fetch(endpoint.url);
+                        const data = await response.json();
+                        return {
+                            name: endpoint.name,
+                            data: data,
+                            error: null
+                        };
+                    } catch (error) {
+                        return {
+                            name: endpoint.name,
+                            data: null,
+                            error: error.message
+                        };
+                    }
+                });
+
+                const results = await Promise.all(promises);
+
+                // Clear table body
+                tableBody.innerHTML = '';
+
+                // Populate table with results
+                results.forEach((result) => {
+                    const row = document.createElement('div');
+                    row.className = 'grid grid-cols-1 md:grid-cols-7 gap-4 p-4 hover:bg-gray-50 transition-colors';
+
+                    if (result.error) {
+                        const responsible = responsibleByApp[result.name] || '-';
+
+                        // Error state
+                        row.innerHTML = `
+                            <div class="flex items-center justify-between md:justify-start md:col-span-1 app-toggle cursor-pointer md:cursor-default app-row">
+                                <div class="flex items-center space-x-2">
+                                    <div class="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+                                        <span class="text-gray-500 text-xs font-semibold">${result.name.charAt(0)}</span>
+                                    </div>
+                                    <span class="font-medium text-gray-700">${result.name}</span>
+                                </div>
+                                <span class="dropdown-icon md:hidden ml-2 text-gray-400 text-xs transition-transform duration-200">&#9662;</span>
+                            </div>
+                            <div class="hidden md:block md:col-span-1 text-center">
+                                <div class="text-gray-400">-</div>
+                            </div>
+                            <div class="hidden md:block md:col-span-1 text-center">
+                                <div class="text-gray-400">-</div>
+                            </div>
+                            <div class="hidden md:block md:col-span-1 text-center">
+                                <div class="text-gray-400">-</div>
+                            </div>
+                            <div class="hidden md:block md:col-span-1 text-center">
+                                <span class="px-3 py-1 bg-red-100 text-red-600 rounded-full text-xs font-medium inline-block">Error</span>
+                            </div>
+                            <div class="hidden md:block md:col-span-1 text-center">
+                                <div class="text-xs text-gray-600 whitespace-pre-line">${responsible}</div>
+                            </div>
+                            <div class="hidden md:block md:col-span-1 text-center">
+                                <button onclick="retryFetch('${result.name}')" class="px-3 py-1 bg-sky-100 text-sky-600 rounded text-xs font-medium hover:bg-sky-200 transition-colors">
+                                    Retry
+                                </button>
+                            </div>
+                            <div class="app-details md:hidden col-span-1 mt-3 text-xs text-gray-600 space-y-1 hidden">
+                                <div><span class="font-semibold">iOS Users:</span> -</div>
+                                <div><span class="font-semibold">Android Users:</span> -</div>
+                                <div><span class="font-semibold">Total Users:</span> -</div>
+                                <div><span class="font-semibold">Status:</span> <span class="text-red-600 font-semibold">Error</span></div>
+                                <div><span class="font-semibold">Responsible:</span> ${responsible}</div>
+                            </div>
+                        `;
+                    } else if (result.data && result.data.success && result.data.data) {
+                        const analytics = result.data.data;
+                        const appName = analytics.Application?.ApplicationName || result.name;
+                        const appImage = analytics.Application?.Image || '';
+                        const iosUsers = analytics.iosUsers || 0;
+                        const androidUsers = analytics.androidUsers || 0;
+                        const totalUsers = analytics.totalUsers || 0;
+                        const responsible = responsibleByApp[result.name] || '-';
+
+                        row.innerHTML = `
+                            <div class="flex items-center justify-between md:justify-start md:col-span-1 app-toggle cursor-pointer md:cursor-default app-row">
+                                <div class="flex items-center space-x-3">
+                                    ${appImage ? `
+                                        <img src="${appImage}" alt="${appName}" class="w-10 h-10 rounded object-contain">
+                                    ` : `
+                                        <div class="w-10 h-10 bg-sky-100 rounded-full flex items-center justify-center">
+                                            <span class="text-sky-600 text-xs font-semibold">${appName.charAt(0)}</span>
+                                        </div>
+                                    `}
+                                    <span class="font-medium text-gray-700">${appName}</span>
+                                </div>
+                                <span class="dropdown-icon md:hidden ml-2 text-gray-400 text-xs transition-transform duration-200">&#9662;</span>
+                            </div>
+                            <div class="hidden md:block md:col-span-1 text-center">
+                                <div class="text-gray-700 font-medium">${iosUsers.toLocaleString()}</div>
+                            </div>
+                            <div class="hidden md:block md:col-span-1 text-center">
+                                <div class="text-gray-700 font-medium">${androidUsers.toLocaleString()}</div>
+                            </div>
+                            <div class="hidden md:block md:col-span-1 text-center">
+                                <div class="text-gray-800 font-semibold">${totalUsers.toLocaleString()}</div>
+                            </div>
+                            <div class="hidden md:block md:col-span-1 text-center">
+                                <span class="px-3 py-1 bg-green-100 text-green-600 rounded-full text-xs font-medium inline-block">Active</span>
+                            </div>
+                            <div class="hidden md:block md:col-span-1 text-center">
+                                <div class="text-xs text-gray-600 whitespace-pre-line">${responsible}</div>
+                            </div>
+                            <div class="hidden md:block md:col-span-1 text-center">
+                                <span class="text-sky-600 text-xs">✓ Loaded</span>
+                            </div>
+                            <div class="app-details md:hidden col-span-1 mt-3 text-xs text-gray-600 space-y-1 hidden">
+                                <div><span class="font-semibold">iOS Users:</span> ${iosUsers.toLocaleString()}</div>
+                                <div><span class="font-semibold">Android Users:</span> ${androidUsers.toLocaleString()}</div>
+                                <div><span class="font-semibold">Total Users:</span> ${totalUsers.toLocaleString()}</div>
+                                <div><span class="font-semibold">Status:</span> <span class="text-green-600 font-semibold">Active</span></div>
+                                <div><span class="font-semibold">Responsible:</span> ${responsible}</div>
+                            </div>
+                        `;
+                    } else {
+                        const responsible = responsibleByApp[result.name] || '-';
+
+                        // Invalid data format
+                        row.innerHTML = `
+                            <div class="flex items-center justify-between md:justify-start md:col-span-1 app-toggle cursor-pointer md:cursor-default app-row">
+                                <div class="flex items-center space-x-2">
+                                    <div class="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+                                        <span class="text-gray-500 text-xs font-semibold">${result.name.charAt(0)}</span>
+                                    </div>
+                                    <span class="font-medium text-gray-700">${result.name}</span>
+                                </div>
+                                <span class="dropdown-icon md:hidden ml-2 text-gray-400 text-xs transition-transform duration-200">&#9662;</span>
+                            </div>
+                            <div class="hidden md:block md:col-span-1 text-center">
+                                <div class="text-gray-400">-</div>
+                            </div>
+                            <div class="hidden md:block md:col-span-1 text-center">
+                                <div class="text-gray-400">-</div>
+                            </div>
+                            <div class="hidden md:block md:col-span-1 text-center">
+                                <div class="text-gray-400">-</div>
+                            </div>
+                            <div class="hidden md:block md:col-span-1 text-center">
+                                <span class="px-3 py-1 bg-yellow-100 text-yellow-600 rounded-full text-xs font-medium inline-block">No Data</span>
+                            </div>
+                            <div class="hidden md:block md:col-span-1 text-center">
+                                <div class="text-xs text-gray-600 whitespace-pre-line">${responsible}</div>
+                            </div>
+                            <div class="hidden md:block md:col-span-1 text-center">
+                                <button onclick="retryFetch('${result.name}')" class="px-3 py-1 bg-sky-100 text-sky-600 rounded text-xs font-medium hover:bg-sky-200 transition-colors">
+                                    Retry
+                                </button>
+                            </div>
+                            <div class="app-details md:hidden col-span-1 mt-3 text-xs text-gray-600 space-y-1 hidden">
+                                <div><span class="font-semibold">iOS Users:</span> -</div>
+                                <div><span class="font-semibold">Android Users:</span> -</div>
+                                <div><span class="font-semibold">Total Users:</span> -</div>
+                                <div><span class="font-semibold">Status:</span> <span class="text-yellow-600 font-semibold">No Data</span></div>
+                                <div><span class="font-semibold">Responsible:</span> ${responsible}</div>
+                            </div>
+                        `;
+                    }
+
+                    tableBody.appendChild(row);
+                });
+
+                attachMobileRowToggles();
+
+                // Build charts from the same results
+                buildChartsFromResults(results);
+
+            } catch (error) {
+                console.error('Error fetching analytics:', error);
+                tableBody.innerHTML = `
+                    <div class="p-8 text-center">
+                        <p class="text-red-600 mb-4">Failed to load analytics data</p>
+                        <button onclick="fetchAllAnalytics()" class="px-4 py-2 bg-sky-600 text-white rounded hover:bg-sky-700 transition-colors">
+                            Retry
+                        </button>
+                    </div>
+                `;
+            } finally {
+                // Hide loader and show main content
+                loader.classList.add('hidden');
+                mainContent.classList.remove('hidden');
+            }
+        }
+
+        // Retry fetch for a specific endpoint
+        async function retryFetch(appName) {
+            const endpoint = apiEndpoints.find(e => e.name === appName);
+            if (!endpoint) return;
+
+            // Find the row and update it to show loading
+            const rows = document.querySelectorAll('#tableBody > div');
+            const rowIndex = apiEndpoints.findIndex(e => e.name === appName);
+            if (rows[rowIndex]) {
+                rows[rowIndex].innerHTML = `
+                    <div class="col-span-1 md:col-span-7 p-4 text-center text-sky-600 text-sm">
+                        Loading...
+                    </div>
+                `;
+            }
+
+            try {
+                const response = await fetch(endpoint.url);
+                const data = await response.json();
+
+                if (rows[rowIndex]) {
+                    if (data && data.success && data.data) {
+                        const analytics = data.data;
+                        const appNameDisplay = analytics.Application?.ApplicationName || appName;
+                        const appImage = analytics.Application?.Image || '';
+                        const iosUsers = analytics.iosUsers || 0;
+                        const androidUsers = analytics.androidUsers || 0;
+                        const totalUsers = analytics.totalUsers || 0;
+
+                        const responsible = responsibleByApp[appName] || '-';
+
+                        rows[rowIndex].innerHTML = `
+                            <div class="flex items-center justify-between md:justify-start md:col-span-1 app-toggle cursor-pointer md:cursor-default app-row">
+                                <div class="flex items-center space-x-3">
+                                    ${appImage ? `
+                                        <img src="${appImage}" alt="${appNameDisplay}" class="w-10 h-10 rounded object-contain">
+                                    ` : `
+                                        <div class="w-10 h-10 bg-sky-100 rounded-full flex items-center justify-center">
+                                            <span class="text-sky-600 text-xs font-semibold">${appNameDisplay.charAt(0)}</span>
+                                        </div>
+                                    `}
+                                    <span class="font-medium text-gray-700">${appNameDisplay}</span>
+                                </div>
+                                <span class="dropdown-icon md:hidden ml-2 text-gray-400 text-xs transition-transform duration-200">&#9662;</span>
+                            </div>
+                            <div class="hidden md:block md:col-span-1 text-center">
+                                <div class="text-xs text-gray-400 mb-1">iOS Users</div>
+                                <div class="text-gray-700 font-medium">${iosUsers.toLocaleString()}</div>
+                            </div>
+                            <div class="hidden md:block md:col-span-1 text-center">
+                                <div class="text-xs text-gray-400 mb-1">Android Users</div>
+                                <div class="text-gray-700 font-medium">${androidUsers.toLocaleString()}</div>
+                            </div>
+                            <div class="hidden md:block md:col-span-1 text-center">
+                                <div class="text-xs text-gray-400 mb-1">Total Users</div>
+                                <div class="text-gray-800 font-semibold">${totalUsers.toLocaleString()}</div>
+                            </div>
+                            <div class="hidden md:block md:col-span-1 text-center">
+                                <div class="text-xs text-gray-400 mb-1">Status</div>
+                                <span class="px-3 py-1 bg-green-100 text-green-600 rounded-full text-xs font-medium inline-block">Active</span>
+                            </div>
+                            <div class="hidden md:block md:col-span-1 text-center">
+                                <div class="text-xs text-gray-400 mb-1 md:mb-2 md:hidden">Responsible</div>
+                                <div class="text-xs text-gray-600 whitespace-pre-line">${responsible}</div>
+                            </div>
+                            <div class="hidden md:block md:col-span-1 text-center">
+                                <div class="text-xs text-gray-400 mb-1">Actions</div>
+                                <span class="text-sky-600 text-xs">✓ Loaded</span>
+                            </div>
+                            <div class="app-details md:hidden col-span-1 mt-3 text-xs text-gray-600 space-y-1 hidden">
+                                <div><span class="font-semibold">iOS Users:</span> ${iosUsers.toLocaleString()}</div>
+                                <div><span class="font-semibold">Android Users:</span> ${androidUsers.toLocaleString()}</div>
+                                <div><span class="font-semibold">Total Users:</span> ${totalUsers.toLocaleString()}</div>
+                                <div><span class="font-semibold">Status:</span> <span class="text-green-600 font-semibold">Active</span></div>
+                                <div><span class="font-semibold">Responsible:</span> ${responsible}</div>
+                            </div>
+                        `;
+                    }
+                }
+            } catch (error) {
+                if (rows[rowIndex]) {
+                    const responsible = responsibleByApp[appName] || '-';
+
+                    rows[rowIndex].innerHTML = `
+                        <div class="flex items-center justify-between md:justify-start md:col-span-1 app-toggle cursor-pointer md:cursor-default app-row">
+                            <div class="flex items-center space-x-2">
+                                <div class="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+                                    <span class="text-gray-500 text-xs font-semibold">${appName.charAt(0)}</span>
+                                </div>
+                                <span class="font-medium text-gray-700">${appName}</span>
+                            </div>
+                            <span class="dropdown-icon md:hidden ml-2 text-gray-400 text-xs transition-transform duration-200">&#9662;</span>
+                        </div>
+                        <div class="md:col-span-1 text-center">
+                            <div class="md:hidden text-xs text-gray-400 mb-1">iOS Users</div>
+                            <div class="text-gray-400">-</div>
+                        </div>
+                        <div class="md:col-span-1 text-center">
+                            <div class="md:hidden text-xs text-gray-400 mb-1">Android Users</div>
+                            <div class="text-gray-400">-</div>
+                        </div>
+                        <div class="md:col-span-1 text-center">
+                            <div class="md:hidden text-xs text-gray-400 mb-1">Total Users</div>
+                            <div class="text-gray-400">-</div>
+                        </div>
+                        <div class="md:col-span-1 text-center">
+                            <div class="md:hidden text-xs text-gray-400 mb-1">Status</div>
+                            <span class="px-3 py-1 bg-red-100 text-red-600 rounded-full text-xs font-medium inline-block">Error</span>
+                        </div>
+                        <div class="md:col-span-1 text-center">
+                            <div class="md:hidden text-xs text-gray-400 mb-1">Actions</div>
+                            <button onclick="retryFetch('${appName}')" class="px-3 py-1 bg-sky-100 text-sky-600 rounded text-xs font-medium hover:bg-sky-200 transition-colors">
+                                Retry
+                            </button>
+                        </div>
+                    `;
+                }
+            }
+
+            attachMobileRowToggles();
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchAllAnalytics();
+
+            const tabGrid = document.getElementById('tab-grid');
+            const tabCharts = document.getElementById('tab-charts');
+            const refreshButton = document.getElementById('refreshButton');
+
+            if (tabGrid && tabCharts) {
+                tabGrid.addEventListener('click', () => {
+                    switchTab('grid');
+                    if (viewSelect) viewSelect.value = 'grid';
+                });
+                tabCharts.addEventListener('click', () => {
+                    switchTab('charts');
+                    if (viewSelect) viewSelect.value = 'charts';
+                });
+            }
+
+            if (viewSelect) {
+                viewSelect.addEventListener('change', (e) => {
+                    const value = e.target.value === 'charts' ? 'charts' : 'grid';
+                    switchTab(value);
+                });
+            }
+
+            if (refreshButton) {
+                refreshButton.addEventListener('click', () => {
+                    const loader = document.getElementById('loader');
+                    const mainContent = document.getElementById('mainContent');
+                    if (loader && mainContent) {
+                        loader.classList.remove('hidden');
+                        mainContent.classList.add('hidden');
+                    }
+                    fetchAllAnalytics();
+                });
+            }
+        });
+    </script>
+</body>
+</html>
